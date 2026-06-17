@@ -224,6 +224,9 @@ background:#16a34a;
 
 .timer-container{
     position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     width:72px;
     height:72px;
     flex-shrink:0;
@@ -234,6 +237,7 @@ background:#16a34a;
     width:100%;
     height:100%;
     overflow:visible;
+    display:block;
 }
 
 .progress-ring{
@@ -466,10 +470,11 @@ background:#16a34a;
     }
 
     .timer-container{
-    position:relative;
-    width:42px;
-    height:42px;
-    flex-shrink:0;
+        position:relative;
+        width:52px;
+        height:52px;
+        flex-shrink:0;
+        overflow:visible;
     }
 
     .logo-barbi{
@@ -549,17 +554,11 @@ background:#16a34a;
     }
 
     .timer-container{
-    position:relative;
-    width:42px;
-    height:42px;
-    flex-shrink:0;
-    }
-
-    .timer-container{
-    position:relative;
-    width:42px;
-    height:42px;
-    flex-shrink:0;
+        position:relative;
+        width:52px;
+        height:52px;
+        flex-shrink:0;
+        overflow:visible;
     }
 
     .timer-text{
@@ -589,6 +588,6 @@ background:#16a34a;
     }
 }
 .progress-ring{
-    width:65px;
-    height:65px;
+    width:100%;
+    height:100%;
 }
