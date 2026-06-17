@@ -53,9 +53,10 @@ border-top:8px solid #f59e0b;
 }
 
 .card-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
 }
 
 .card-header h2{
@@ -64,11 +65,13 @@ color:#0f172a;
 }
 
 .info-topo{
-display:flex;
-justify-content:space-between;
-margin-top:5px;
-font-size:20px;
-font-weight:600;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:20px;
+
+    font-size:12px;
+    font-weight:600;
 }
 
 .contador{
@@ -220,10 +223,15 @@ background:#16a34a;
 }
 
 .timer-container{
-position:relative;
-width:65px;
-height:65px;
-margin:5px auto;
+    position:relative;
+    width:65px;
+    height:65px;
+    flex-shrink:0;
+}
+
+.timer-container svg{
+    width:100%;
+    height:100%;
 }
 
 .progress-ring{
@@ -241,75 +249,34 @@ margin:5px auto;
     stroke:#16a34a;
     stroke-width:8;
     stroke-linecap:round;
-
-    stroke-dasharray:239;
-    stroke-dashoffset:239;
-
+    stroke-dasharray:163;
+    stroke-dashoffset:163;
     transition:.5s;
 }
 
 .timer-text{
     position:absolute;
     inset:0;
-
     display:flex;
     align-items:center;
     justify-content:center;
-
     font-size:12px;
     font-weight:700;
 }
 .painel-central{
-display:flex;
-justify-content:center;
-align-items:center;
-gap:30px;
-margin-top:5px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:20px;
 }
 
 .producao-info{
-display:flex;
-flex-direction:column;
-align-items:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-width:10px;
 }
 
-.timer-container{
-position:relative;
-width:65px;
-height:65px;
-margin:0;
-flex-shrink:0;
-}
-
-.progress-ring{
-transform:rotate(-90deg);
-}
-
-.ring-bg{
-fill:none;
-stroke:#e5e7eb;
-stroke-width:8;
-}
-
-.ring-progress{
-fill:none;
-stroke:#16a34a;
-stroke-width:8;
-stroke-linecap:round;
-stroke-dasharray:163;
-stroke-dashoffset:163;
-transition:.5s;
-}
-
-.timer-text{
-position:absolute;
-inset:0;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:12px;
-font-weight:700;
-}
 .modal-content select{
 
     width:100%;
@@ -355,18 +322,25 @@ font-weight:700;
 
 }
 .acoes-operador{
-
     display:flex;
-    flex-direction:column;
-    gap:8px;
+    flex-direction:row;
+    gap:6px;
+}
 
+.acoes-operador button{
+    flex:1;
+}
+
+.acoes-operador button{
+    flex:1;
 }
 .header{
     background:#0f172a;
     color:white;
 
     display:flex;
-    justify-content:space-between;
+    justify-content:flex-start;
+    gap:6px;
     align-items:center;
 
     padding:12px 20px;
@@ -489,8 +463,10 @@ font-weight:700;
     }
 
     .timer-container{
-        width:55px;
-        height:55px;
+    position:relative;
+    width:42px;
+    height:42px;
+    flex-shrink:0;
     }
 
     .logo-barbi{
@@ -511,7 +487,7 @@ font-weight:700;
     }
 
     .card{
-        padding:6px;
+        padding:4px;
         border-radius:8px;
     }
 
@@ -530,7 +506,7 @@ font-weight:700;
     }
 
     .contador{
-        font-size:24px;
+        font-size:20px;
         line-height:1;
     }
 
@@ -570,13 +546,17 @@ font-weight:700;
     }
 
     .timer-container{
-        width:42px;
-        height:42px;
+    position:relative;
+    width:42px;
+    height:42px;
+    flex-shrink:0;
     }
 
-    .progress-ring{
-        width:42px;
-        height:42px;
+    .timer-container{
+    position:relative;
+    width:42px;
+    height:42px;
+    flex-shrink:0;
     }
 
     .timer-text{
@@ -606,6 +586,6 @@ font-weight:700;
     }
 }
 .progress-ring{
-    width:42px;
-    height:42px;
+    width:65px;
+    height:65px;
 }
