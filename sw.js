@@ -1,4 +1,4 @@
-const CACHE_NAME = "apontamento-v1";
+const CACHE_NAME = "apontamento-v2";
 
 const arquivos = [
     "./",
@@ -17,6 +17,25 @@ self.addEventListener("install", event => {
 
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(arquivos))
+            .then(() => self.skipWaiting())
+
+    );
+
+});
+
+self.addEventListener("activate", event => {
+
+    event.waitUntil(
+
+        caches.keys()
+            .then(chaves =>
+                Promise.all(
+                    chaves
+                        .filter(chave => chave !== CACHE_NAME)
+                        .map(chave => caches.delete(chave))
+                )
+            )
+            .then(() => self.clients.claim())
 
     );
 
