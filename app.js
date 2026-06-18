@@ -1000,22 +1000,16 @@ window.addEventListener(
 
 if("serviceWorker" in navigator){
 
-    navigator.serviceWorker
-        .register("./sw.js")
-        .then(() => {
+   navigator.serviceWorker
+    .register("./sw.js")
+    .then(reg => {
 
-            console.log(
-                "Service Worker registrado"
-            );
+        reg.update();
 
-        })
-        .catch(erro => {
+        setInterval(() => {
+            reg.update();
+        }, 60000);
 
-            console.error(
-                "Erro ao registrar Service Worker",
-                erro
-            );
-
-        });
+    });
 
 }
