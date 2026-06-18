@@ -232,19 +232,20 @@ function adicionarEventosBotoes(card){
     const btnApontar =
         card.querySelector(".btn-apontar");
 
-    if(btnApontar){
+    if(btnApontar && !btnApontar.dataset.handlerAttached){
 
         btnApontar.addEventListener(
             "click",
             () => apontar(card)
         );
+        btnApontar.dataset.handlerAttached = "true";
 
     }
 
     const btnParada =
         card.querySelector(".btn-parada");
 
-    if(btnParada){
+    if(btnParada && !btnParada.dataset.handlerAttached){
 
         btnParada.addEventListener(
             "click",
@@ -257,25 +258,27 @@ function adicionarEventosBotoes(card){
 
             }
         );
+        btnParada.dataset.handlerAttached = "true";
 
     }
 
     const btnFinalizar =
-    card.querySelector(".btn-finalizar");
+        card.querySelector(".btn-finalizar");
 
-if(btnFinalizar){
+    if(btnFinalizar && !btnFinalizar.dataset.handlerAttached){
 
-    btnFinalizar.addEventListener(
-        "click",
-        () => finalizar(card)
-    );
+        btnFinalizar.addEventListener(
+            "click",
+            () => finalizar(card)
+        );
+        btnFinalizar.dataset.handlerAttached = "true";
 
-}
+    }
 
     const btnRetornar =
         card.querySelector(".btn-retornar");
 
-    if(btnRetornar){
+    if(btnRetornar && !btnRetornar.dataset.handlerAttached){
 
         btnRetornar.addEventListener(
             "click",
@@ -353,6 +356,7 @@ if(btnFinalizar){
 
             }
         );
+        btnRetornar.dataset.handlerAttached = "true";
 
     }
 
@@ -876,7 +880,13 @@ window.addEventListener(
 );
 window.addEventListener(
     "load",
-    restaurarEstado
+    () => {
+        restaurarEstado();
+        document.querySelectorAll(".card").forEach(card => {
+            adicionarEventosBotoes(card);
+        });
+        atualizarIndicadorSincronizacao();
+    }
 );
 function restaurarEstado(){
 
