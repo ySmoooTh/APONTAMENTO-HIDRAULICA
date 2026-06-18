@@ -24,96 +24,148 @@ font-weight:700;
 
 .container{
 display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px;
-padding:12px;
-height:calc(100vh - 55px);
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:18px;
+padding:20px;
 }
 
 .card{
 background:white;
 border-radius:18px;
-padding:15px;
-box-shadow:0 3px 10px rgba(0,0,0,.10);
+padding:20px;
+box-shadow:0 18px 35px rgba(15,23,42,.08);
 display:flex;
 flex-direction:column;
-justify-content:space-between;
+gap:18px;
+min-height:360px;
 }
 
 .card.livre{
-border-top:8px solid #64748b;
+border-top:6px solid #64748b;
 }
 
 .card.produzindo{
-    box-shadow:0 0 15px rgba(22,163,74,.4);
+border-top:6px solid #16a34a;
+box-shadow:0 20px 40px rgba(22,163,74,.12);
 }
 
 .card.parado{
-border-top:8px solid #f59e0b;
+border-top:6px solid #f59e0b;
 }
 
 .card-header{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:4px;
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+gap:12px;
+flex-wrap:wrap;
 }
 
 .card-header h2{
-font-size:18px;
+font-size:20px;
+margin:0;
 color:#0f172a;
+text-transform:uppercase;
 }
 
 .info-topo{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:20px;
+display:flex;
+gap:14px;
+align-items:center;
+font-size:13px;
+font-weight:700;
+color:#475569;
+}
 
-    font-size:12px;
-    font-weight:600;
+.info-topo span{
+color:#64748b;
 }
 
 .contador{
-text-align:center;
-font-size:28px;
+font-size:36px;
 font-weight:800;
 color:#0f172a;
 line-height:1;
 }
 
-.legenda{
-text-align:center;
-color:#64748b;
+.ultimo-tempo{
+font-size:22px;
+color:#0f172a;
+}
+
+.status{
 font-size:14px;
+font-weight:700;
+border-radius:999px;
+padding:10px 0;
+background:#f1f5f9;
+color:#0f172a;
 }
 
-.tempo{
+.status-produzindo{
+background:#dcfce7;
+color:#166534;
+}
+
+.status-livre{
+background:#f8fafc;
+color:#0f172a;
+}
+
+.status-parado{
+background:#fef3c7;
+color:#92400e;
+}
+
+.painel-central{
+display:grid;
+grid-template-columns:repeat(4,minmax(0,1fr));
+gap:16px;
+align-items:center;
+}
+
+.item-info{
 display:flex;
+flex-direction:column;
 justify-content:center;
-margin-top:8px;
-gap:25px;
-}
-
-.tempo div{
+align-items:center;
+gap:10px;
+background:#f8fafc;
+border-radius:16px;
+padding:18px;
 text-align:center;
+min-height:130px;
 }
 
-.tempo span{
-display:block;
+.item-info .titulo-info{
 font-size:12px;
-color:#64748b;
+font-weight:700;
+letter-spacing:0.06em;
+color:#475569;
 }
 
-.tempo strong{
-font-size:20px;
+.timer-box{
+padding:14px;
+background:white;
+box-shadow:inset 0 0 0 1px #e2e8f0;
+}
+
+.acoes-operador{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:center;
+}
+
+.acoes-operador button{
+flex:1 1 0;
+min-width:140px;
 }
 
 .status{
 text-align:center;
-font-size:18px;
+font-size:14px;
 font-weight:700;
-margin-top:5px;
 }
 
 .btn-iniciar,
@@ -264,21 +316,22 @@ background:#16a34a;
     position:absolute;
     top:50%;
     left:50%;
-    transform:translate(-56%, -52%);
+    transform:translate(-50%, -50%);
     width:100%;
     height:100%;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:12px;
+    font-size:14px;
     font-weight:700;
     line-height:1;
 }
+
 .painel-central{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:20px;
+display:grid;
+grid-template-columns:repeat(4,minmax(0,1fr));
+gap:16px;
+align-items:center;
 }
 
 .producao-info{
@@ -335,7 +388,7 @@ background:#16a34a;
 .acoes-operador{
     display:flex;
     flex-direction:row;
-    gap:10px;
+    gap:4px;
     align-items:center;
     flex-wrap:wrap;
 }
@@ -417,6 +470,22 @@ background:#16a34a;
     border-color:#fcd34d;
 }
 
+.header-metas{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    gap:10px;
+    font-size:13px;
+    color:#cbd5e1;
+}
+
+.header-metas span{
+    background:rgba(255,255,255,.08);
+    padding:8px 12px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+}
+
 @media (max-width: 900px){
     .header{
         flex-direction:column;
@@ -434,35 +503,35 @@ background:#16a34a;
         width:100%;
     }
 }
-@media (max-width: 1280px){
 
+@media (max-width: 1280px){
     .container{
-        gap:8px;
-        padding:8px;
+        gap:12px;
+        padding:16px;
     }
 
     .card{
-        padding:10px;
+        padding:16px;
     }
 
     .header h1{
-        font-size:20px;
+        font-size:26px;
     }
 
     .info-topo{
-        font-size:15px;
+        font-size:14px;
     }
 
     .contador{
-        font-size:34px;
+        font-size:30px;
     }
 
-    .tempo strong{
-        font-size:16px;
+    .ultimo-tempo{
+        font-size:20px;
     }
 
     .status{
-        font-size:15px;
+        font-size:14px;
     }
 
     .btn-iniciar,
@@ -475,48 +544,30 @@ background:#16a34a;
     }
 
     .timer-container{
-        position:relative;
-        width:52px;
-        height:52px;
-        flex-shrink:0;
-        overflow:visible;
+        width:64px;
+        height:64px;
     }
 
     .logo-barbi{
-        height:40px;
+        height:45px;
     }
 }
 
-/* TABLETS 8" */
-
-/* TABLETS 8" E TELAS PEQUENAS */
-
-@media (max-width: 1400px){
-
-    .container{
-        gap:4px;
-        padding:4px;
-        height:calc(100vh - 45px);
-    }
-
-    .card{
-        padding:4px;
-        border-radius:8px;
-    }
-
-    .card-header h2{
-        font-size:13px;
-    }
-
-    .info-topo{
-        margin-top:2px;
-        font-size:10px;
-    }
-
+@media (max-width: 700px){
     .painel-central{
-        gap:10px;
-        margin-top:2px;
+        grid-template-columns:repeat(2,minmax(0,1fr));
     }
+}
+
+@media (max-width: 560px){
+    .painel-central{
+        grid-template-columns:1fr;
+    }
+
+    .acoes-operador{
+        flex-direction:column;
+    }
+}
 
     .contador{
         font-size:20px;
@@ -595,4 +646,51 @@ background:#16a34a;
 .progress-ring{
     width:100%;
     height:100%;
+}
+.painel-central{
+    display:grid;
+    grid-template-columns:
+        1fr
+        1fr
+        90px
+        1fr;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:8px 0;
+}
+
+.item-info{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+}
+
+.titulo-info{
+    font-size:11px;
+    color:#64748b;
+    margin-bottom:4px;
+}
+
+.contador{
+    font-size:42px;
+    font-weight:800;
+    line-height:1;
+}
+
+.ultimo-tempo{
+    font-size:24px;
+}
+
+.status{
+    font-size:22px;
+    font-weight:700;
+}
+
+.timer-container{
+    width:70px;
+    height:70px;
 }
