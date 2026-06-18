@@ -459,6 +459,11 @@ async function apontar(card){
     card.dataset.contador =
         contador;
 
+    const tempoParado =
+        Number(
+        card.dataset.paradasAcumuladas || 0
+        ) / 1000;
+
     card.dataset.ultimoApontamento =
         agora;
 
@@ -486,27 +491,37 @@ async function apontar(card){
     iniciarCronometro(card);
     salvarEstado();
 
-    gravarEvento({
 
-        operador:
-            card.dataset.operador,
+const tempoTotal =
+    duracao + tempoParado;
 
-        registro:
-            card.dataset.registro,
+gravarEvento({
 
-        op:
-            card.dataset.op,
+    operador:
+        card.dataset.operador,
 
-        evento:
-            "APONTAMENTO",
+    registro:
+        card.dataset.registro,
 
-        contador:
-            contador,
+    op:
+        card.dataset.op,
 
-        duracao:
-            duracao
+    evento:
+        "APONTAMENTO",
 
-    }).catch(console.error);
+    contador:
+        contador,
+
+    duracao:
+        tempoTotal,
+
+    tempoParado:
+        tempoParado,
+
+    tempoProdutivo:
+        duracao
+
+}).catch(console.error);
 
 }
 
@@ -535,7 +550,8 @@ async function gravarEvento(dados){
                 contador: dados.contador || "",
                 turno: dados.turno || "",
                 duracao: dados.duracao || "",
-                tempoParado: dados.tempoParado || ""
+                tempoParado: dados.tempoParado || "",
+                tempoProdutivo: dados.tempoProdutivo || ""
 
             })
 
