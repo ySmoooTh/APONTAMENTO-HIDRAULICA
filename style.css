@@ -493,6 +493,35 @@ align-items:center;
     border:1px solid rgba(255,255,255,.16);
 }
 
+.reset-btn{
+    background:transparent;
+    color:#e2e8f0;
+    border:1px solid rgba(255,255,255,0.12);
+    padding:6px 10px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:700;
+}
+
+.reset-btn:hover{
+    background:rgba(255,255,255,0.04);
+}
+
+.restore-btn{
+    background:transparent;
+    color:#e2e8f0;
+    border:1px solid rgba(255,255,255,0.10);
+    padding:6px 10px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:700;
+    margin-left:6px;
+}
+
+.restore-btn:hover{
+    background:rgba(255,255,255,0.03);
+}
+
 @media (max-width: 900px){
     .header{
         flex-direction:column;

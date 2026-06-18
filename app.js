@@ -27,6 +27,69 @@ function adicionarFila(dados){
 
 }
 
+// Clear all persisted state (localStorage, fila, caches, service workers) and reload
+async function clearAllState(){
+
+    if(!confirm('Confirma resetar TODO o estado da aplicação? Isso limpará registros locais e cache.')){
+        return;
+    }
+
+    try{
+        // remove app state keys
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(FILA_KEY);
+
+        // clear Cache Storage (all caches) if available
+        if('caches' in window){
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+        }
+
+        // unregister service workers
+        if('serviceWorker' in navigator){
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(r => r.unregister()));
+        }
+
+    }catch(e){
+        console.error('Erro ao limpar estado:', e);
+    }
+
+    // reload page to start fresh
+    location.reload();
+
+}
+
+// attach reset button if present
+document.addEventListener('DOMContentLoaded', () => {
+    const resetBtn = document.getElementById('resetBtn');
+    if(resetBtn){
+        resetBtn.addEventListener('click', clearAllState);
+    }
+});
+
+// Restore button - manual restore of saved state
+document.addEventListener('DOMContentLoaded', () => {
+    const restoreBtn = document.getElementById('restoreBtn');
+    if(restoreBtn){
+        restoreBtn.addEventListener('click', () => {
+            if(!localStorage.getItem(STORAGE_KEY)){
+                alert('Não há estado salvo para restaurar.');
+                return;
+            }
+
+            if(!confirm('Restaurar estado salvo? Isso irá aplicar os valores salvos anteriormente.')){
+                return;
+            }
+
+            restaurarEstado();
+            // ensure handlers attached in case restore didn't add them
+            document.querySelectorAll('.card').forEach(addicionarEventosBotoes);
+            atualizarIndicadorSincronizacao();
+        });
+    }
+});
+
 const modal = document.getElementById("modalInicio");
 const modalParada =
     document.getElementById("modalParada");
@@ -369,21 +432,27 @@ async function apontar(card){
             card.dataset.contador
         );
 
+    if(Number.isNaN(contador)){
+        contador = 0;
+    }
+
     contador++;
 
     const agora =
         Date.now();
 
+    const ultimoApontamento =
+        Number(card.dataset.ultimoApontamento);
+
+    const paradasAcumuladas =
+        Number(card.dataset.paradasAcumuladas);
+
     const duracao =
         Math.floor(
             (
                 agora -
-                Number(
-                    card.dataset.ultimoApontamento
-                ) -
-                Number(
-                    card.dataset.paradasAcumuladas || 0
-                )
+                (Number.isNaN(ultimoApontamento) ? agora : ultimoApontamento) -
+                (Number.isNaN(paradasAcumuladas) ? 0 : paradasAcumuladas)
             ) / 1000
         );
 
@@ -878,13 +947,21 @@ window.addEventListener(
     "offline",
     atualizarIndicadorSincronizacao
 );
+// Control whether to auto-restore saved state on load. Default: false (do not auto-restore)
+const AUTO_RESTORE_ON_LOAD = false;
+
 window.addEventListener(
     "load",
     () => {
-        restaurarEstado();
+        if(AUTO_RESTORE_ON_LOAD){
+            restaurarEstado();
+        }
+
+        // always attach event handlers to existing cards
         document.querySelectorAll(".card").forEach(card => {
             adicionarEventosBotoes(card);
         });
+
         atualizarIndicadorSincronizacao();
     }
 );
@@ -919,14 +996,17 @@ function restaurarEstado(){
         card.dataset.op =
             item.op;
 
+        const contadorRestored = Number(item.contador);
         card.dataset.contador =
-            item.contador;
+            Number.isNaN(contadorRestored) ? 0 : contadorRestored;
 
+        const ultimoApontamentoRestored = Number(item.ultimoApontamento);
         card.dataset.ultimoApontamento =
-            item.ultimoApontamento;
+            Number.isNaN(ultimoApontamentoRestored) ? '' : ultimoApontamentoRestored;
 
+        const paradasAcumuladasRestored = Number(item.paradasAcumuladas);
         card.dataset.paradasAcumuladas =
-            item.paradasAcumuladas;
+            Number.isNaN(paradasAcumuladasRestored) ? 0 : paradasAcumuladasRestored;
 
         card.dataset.inicioParada =
             item.inicioParada || "";

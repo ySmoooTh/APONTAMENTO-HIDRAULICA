@@ -27,32 +27,33 @@
 
             <div class="header-metas">
                 <span>Conectado</span>
-                <span>18/06/2025 15:30:45</span>
                 <span>0 pendentes</span>
                 <span>Versão 1.0</span>
+                <button id="resetBtn" class="reset-btn" title="Resetar estado (localStorage, fila e cache)">Reset</button>
+                <button id="restoreBtn" class="restore-btn" title="Restaurar estado salvo">Restaurar</button>
             </div>
         </div>
     </header>
 
     <main class="container">
-        <div class="card produzindo">
+        <div class="card livre">
             <div class="card-header">
                 <h2>OPERADOR 1</h2>
                 <div class="info-topo">
-                    <span>OP: 2</span>
-                    <span>RG: 2</span>
+                    <span>OP: -</span>
+                    <span>RG: -</span>
                 </div>
             </div>
 
             <div class="painel-central">
                 <div class="item-info">
                     <span class="titulo-info">QUADROS</span>
-                    <div class="contador">1</div>
+                    <div class="contador">0</div>
                 </div>
 
                 <div class="item-info">
                     <span class="titulo-info">ÚLTIMO</span>
-                    <strong class="ultimo-tempo">00:02</strong>
+                    <strong class="ultimo-tempo">00:00</strong>
                 </div>
 
                 <div class="item-info timer-box">
@@ -61,20 +62,18 @@
                             <circle class="ring-bg" cx="32" cy="32" r="26"></circle>
                             <circle class="ring-progress" cx="32" cy="32" r="26"></circle>
                         </svg>
-                        <div class="timer-text">00:07</div>
+                        <div class="timer-text">00:00</div>
                     </div>
                 </div>
 
                 <div class="item-info">
                     <span class="titulo-info">STATUS</span>
-                    <div class="status status-produzindo">PRODUZINDO</div>
+                    <div class="status status-livre">LIVRE</div>
                 </div>
             </div>
 
             <div class="acoes-operador">
-                <button class="btn-apontar">APONTAR</button>
-                <button class="btn-parada">PARADA</button>
-                <button class="btn-finalizar">FINALIZAR</button>
+                <button class="btn-iniciar">INICIAR</button>
             </div>
         </div>
 
