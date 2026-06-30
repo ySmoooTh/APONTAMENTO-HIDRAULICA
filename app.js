@@ -2,6 +2,99 @@ const timers = {};
 const STORAGE_KEY = "apontamento_hidraulica_estado";
 const FILA_KEY =
     "apontamento_hidraulica_fila";
+const AUTO_RESTORE_ON_LOAD = true;
+
+function toSafeTimestamp(value){
+
+    const parsed = Number(value);
+
+    if(Number.isNaN(parsed) || parsed <= 0){
+        return null;
+    }
+
+    return parsed;
+
+}
+
+function calcularDuracaoSegura(inicio, fim = Date.now()){
+
+    const inicioSeguro = toSafeTimestamp(inicio);
+    const fimSeguro = toSafeTimestamp(fim) || Date.now();
+
+    if(!inicioSeguro){
+        return 0;
+    }
+
+    return Math.max(0, fimSeguro - inicioSeguro);
+
+}
+
+function setCardBusy(card, busy){
+
+    if(!card){
+        return;
+    }
+
+    if(busy){
+        card.dataset.busy = "true";
+    } else {
+        delete card.dataset.busy;
+    }
+
+    card.querySelectorAll("button").forEach(button => {
+        button.disabled = busy;
+    });
+
+}
+
+function isCardBusy(card){
+
+    return card?.dataset.busy === "true";
+
+}
+
+function getTempoParadasAcumuladas(card){
+
+    const paradasAcumuladas =
+        Number(card.dataset.paradasAcumuladas || 0);
+
+    return Number.isNaN(paradasAcumuladas)
+        ? 0
+        : Math.max(0, paradasAcumuladas);
+
+}
+
+function getTempoParadaAtual(card){
+
+    if(card.querySelector(".status")?.innerText !== "PARADO"){
+        return 0;
+    }
+
+    return calcularDuracaoSegura(
+        card.dataset.inicioParada
+    );
+
+}
+
+function getTempoProdutivoAtual(card){
+
+    const ultimoApontamento =
+        toSafeTimestamp(
+            card.dataset.ultimoApontamento
+        );
+
+    if(!ultimoApontamento){
+        return 0;
+    }
+
+    return Math.max(
+        0,
+        calcularDuracaoSegura(ultimoApontamento) -
+        getTempoParadasAcumuladas(card) -
+        getTempoParadaAtual(card)
+    );
+
+}
 
 function obterFilaLocal(){
 
@@ -349,74 +442,81 @@ function adicionarEventosBotoes(card){
 
                 cardSelecionado = card;
 
+                if(isCardBusy(card)){
+                    return;
+                }
+
+                setCardBusy(card, true);
+
                 const tempoParado =
                     Math.floor(
-                        (
-                            Date.now() -
-                            Number(
-                                card.dataset.inicioParada || Date.now()
-                            )
-                        ) / 1000
+                        getTempoParadaAtual(card) / 1000
                     );
 
                 card.dataset.paradasAcumuladas =
-                    Number(
-                        card.dataset.paradasAcumuladas || 0
-                    ) +
+                    getTempoParadasAcumuladas(card) +
                     (tempoParado * 1000);
 
-                await gravarEvento({
+                try{
 
-                    operador:
-                        card.dataset.operador,
+                    await gravarEvento({
 
-                    registro:
-                        card.dataset.registro,
+                        operador:
+                            card.dataset.operador,
 
-                    op:
-                        card.dataset.op,
+                        registro:
+                            card.dataset.registro,
 
-                    evento:
-                        "RETORNO",
+                        op:
+                            card.dataset.op,
 
-                    tempoParado:
-                        tempoParado
+                        evento:
+                            "RETORNO",
 
-                });
+                        tempoParado:
+                            tempoParado,
 
-                card.classList.remove(
-                    "parado"
-                );
+                        motivo:
+                            card.dataset.ultimoMotivoParada || ""
 
-                card.classList.add(
-                    "produzindo"
-                );
+                    });
 
-                card.querySelector(".status")
-                    .innerText = "PRODUZINDO";
+                    card.classList.remove(
+                        "parado"
+                    );
 
-                const acoes =
-                    card.querySelector(".acoes-operador");
+                    card.classList.add(
+                        "produzindo"
+                    );
 
-                acoes.innerHTML = `
-                    <button class="btn-apontar">
-                        APONTAR
-                    </button>
+                    card.querySelector(".status")
+                        .innerText = "PRODUZINDO";
 
-                    <button class="btn-parada">
-                        PARADA
-                    </button>
+                    const acoes =
+                        card.querySelector(".acoes-operador");
 
-                    <button class="btn-finalizar">
-                        FINALIZAR
-                    </button>
-                `;
+                    acoes.innerHTML = `
+                        <button class="btn-apontar">
+                            APONTAR
+                        </button>
 
-                adicionarEventosBotoes(card);
-                resetarCronometro(card);
-                iniciarCronometro(card);
-                salvarEstado();
+                        <button class="btn-parada">
+                            PARADA
+                        </button>
 
+                        <button class="btn-finalizar">
+                            FINALIZAR
+                        </button>
+                    `;
+
+                    adicionarEventosBotoes(card);
+                    resetarCronometro(card);
+                    iniciarCronometro(card);
+                    salvarEstado();
+
+                } finally {
+                    setCardBusy(card, false);
+                }
             }
         );
         btnRetornar.dataset.handlerAttached = "true";
@@ -426,6 +526,14 @@ function adicionarEventosBotoes(card){
 }
 
 async function apontar(card){
+
+    if(isCardBusy(card)){
+        return;
+    }
+
+    setCardBusy(card, true);
+
+    try{
 
     let contador =
         Number(
@@ -445,24 +553,27 @@ async function apontar(card){
         Number(card.dataset.ultimoApontamento);
 
     const paradasAcumuladas =
-        Number(card.dataset.paradasAcumuladas);
+        getTempoParadasAcumuladas(card);
 
     const duracao =
-        Math.floor(
-            (
-                agora -
-                (Number.isNaN(ultimoApontamento) ? agora : ultimoApontamento) -
-                (Number.isNaN(paradasAcumuladas) ? 0 : paradasAcumuladas)
-            ) / 1000
+        Math.max(
+            0,
+            Math.floor(
+                (
+                    agora -
+                    (Number.isNaN(ultimoApontamento) ? agora : ultimoApontamento) -
+                    paradasAcumuladas
+                ) / 1000
+            )
         );
 
     card.dataset.contador =
         contador;
 
     const tempoParado =
-        Number(
-        card.dataset.paradasAcumuladas || 0
-        ) / 1000;
+        Math.floor(
+            getTempoParadasAcumuladas(card) / 1000
+        );
 
     card.dataset.ultimoApontamento =
         agora;
@@ -495,7 +606,7 @@ async function apontar(card){
 const tempoTotal =
     duracao + tempoParado;
 
-gravarEvento({
+await gravarEvento({
 
     operador:
         card.dataset.operador,
@@ -521,7 +632,11 @@ gravarEvento({
     tempoProdutivo:
         duracao
 
-}).catch(console.error);
+});
+
+    } finally {
+        setCardBusy(card, false);
+    }
 
 }
 
@@ -581,6 +696,17 @@ document
 .querySelector(".confirmar-parada")
 .addEventListener("click", async () => {
 
+    const btnConfirmarParada =
+        document.querySelector(".confirmar-parada");
+
+    if(
+        !cardSelecionado ||
+        isCardBusy(cardSelecionado) ||
+        btnConfirmarParada.disabled
+    ){
+        return;
+    }
+
     const motivo =
         document.getElementById("motivoParada").value;
 
@@ -592,73 +718,89 @@ document
 
     }
 
+    btnConfirmarParada.disabled = true;
+    setCardBusy(cardSelecionado, true);
+
     cardSelecionado.dataset.inicioParada =
         Date.now();
+    cardSelecionado.dataset.ultimoMotivoParada =
+        motivo;
 
-    await gravarEvento({
+    try{
 
-        operador:
-            cardSelecionado.dataset.operador,
+        await gravarEvento({
 
-        registro:
-            cardSelecionado.dataset.registro,
+            operador:
+                cardSelecionado.dataset.operador,
 
-        op:
-            cardSelecionado.dataset.op,
+            registro:
+                cardSelecionado.dataset.registro,
 
-        evento:
-            "PARADA",
+            op:
+                cardSelecionado.dataset.op,
 
-        motivo:
-            motivo
+            evento:
+                "PARADA",
 
-    });
+            motivo:
+                motivo
 
-    cardSelecionado.classList.remove(
-        "produzindo"
-    );
+        });
 
-    cardSelecionado.classList.add(
-        "parado"
-    );
-
-    cardSelecionado.querySelector(".status")
-        .innerText = "PARADO";
-
-    const btnApontar =
-        cardSelecionado.querySelector(".btn-apontar");
-
-    const btnParada =
-        cardSelecionado.querySelector(".btn-parada");
-
-    const btnFinalizar =
-        cardSelecionado.querySelector(".btn-finalizar");
-
-    if(btnApontar) btnApontar.remove();
-
-    if(btnParada) btnParada.remove();
-
-    if(btnFinalizar){
-
-        btnFinalizar.insertAdjacentHTML(
-            "beforebegin",
-            `
-            <button class="btn-retornar">
-                RETORNAR
-            </button>
-            `
+        cardSelecionado.classList.remove(
+            "produzindo"
         );
 
+        cardSelecionado.classList.add(
+            "parado"
+        );
+
+        cardSelecionado.querySelector(".status")
+            .innerText = "PARADO";
+
+        const btnApontar =
+            cardSelecionado.querySelector(".btn-apontar");
+
+        const btnParada =
+            cardSelecionado.querySelector(".btn-parada");
+
+        const btnFinalizar =
+            cardSelecionado.querySelector(".btn-finalizar");
+
+        if(btnApontar) btnApontar.remove();
+
+        if(btnParada) btnParada.remove();
+
+        if(btnFinalizar){
+
+            btnFinalizar.insertAdjacentHTML(
+                "beforebegin",
+                `
+                <button class="btn-retornar">
+                    RETORNAR
+                </button>
+                `
+            );
+
+        }
+
+        adicionarEventosBotoes(cardSelecionado);
+        salvarEstado();
+
+        modalParada.style.display = "none";
+
+    } finally {
+        setCardBusy(cardSelecionado, false);
+        btnConfirmarParada.disabled = false;
     }
-
-    adicionarEventosBotoes(cardSelecionado);
-    salvarEstado();
-
-    modalParada.style.display = "none";
 
 });
 
 async function finalizar(card){
+
+    if(isCardBusy(card)){
+        return;
+    }
 
     const confirmar =
         confirm(
@@ -669,30 +811,34 @@ async function finalizar(card){
         return;
     }
 
-    await gravarEvento({
+    setCardBusy(card, true);
 
-        operador:
-            card.dataset.operador,
+    try{
 
-        registro:
-            card.dataset.registro,
+        await gravarEvento({
 
-        op:
-            card.dataset.op,
+            operador:
+                card.dataset.operador,
 
-        evento:
-            "FINALIZADO",
+            registro:
+                card.dataset.registro,
 
-        contador:
-            card.dataset.contador
+            op:
+                card.dataset.op,
 
-    });
+            evento:
+                "FINALIZADO",
 
-    clearInterval(
-        timers[
-            card.dataset.operador
-        ]
-    );
+            contador:
+                card.dataset.contador
+
+        });
+
+        clearInterval(
+            timers[
+                card.dataset.operador
+            ]
+        );
 
     card.classList.remove(
         "produzindo",
@@ -745,7 +891,8 @@ async function finalizar(card){
     delete card.dataset.contador;
     delete card.dataset.ultimoApontamento;
     delete card.dataset.paradasAcumuladas;
-    delete card.dataset.inicioParada;
+        delete card.dataset.inicioParada;
+        delete card.dataset.ultimoMotivoParada;
 
     const btnIniciar =
         card.querySelector(".btn-iniciar");
@@ -762,7 +909,11 @@ async function finalizar(card){
         }
     );
 
-    salvarEstado();
+        salvarEstado();
+
+    } finally {
+        setCardBusy(card, false);
+    }
 
 }
 
@@ -779,7 +930,47 @@ if(!timerTexto || !circulo){
 
 const circumference = 163;
 
-let segundos = 0;
+let segundos =
+    Math.floor(
+        getTempoProdutivoAtual(card) / 1000
+    );
+
+const minutosIniciais =
+    String(
+        Math.floor(segundos / 60)
+    ).padStart(2,"0");
+
+const segundosIniciais =
+    String(
+        segundos % 60
+    ).padStart(2,"0");
+
+timerTexto.innerText =
+    `${minutosIniciais}:${segundosIniciais}`;
+
+const percentualInicial =
+    Math.min(
+        segundos / TEMPO_META,
+        1
+    );
+
+circulo.style.strokeDashoffset =
+    circumference -
+    (circumference * percentualInicial);
+
+if(segundos >= TEMPO_META){
+
+    circulo.style.stroke =
+        "#f59e0b";
+
+}
+
+if(segundos >= TEMPO_META + 60){
+
+    circulo.style.stroke =
+        "#dc2626";
+
+}
 
 timers[
     card.dataset.operador
@@ -858,6 +1049,9 @@ function salvarEstado() {
 
             inicioParada:
                 card.dataset.inicioParada || "",
+
+            ultimoMotivoParada:
+                card.dataset.ultimoMotivoParada || "",
 
             status:
                 card.querySelector(".status").innerText,
@@ -963,9 +1157,6 @@ window.addEventListener(
     "offline",
     atualizarIndicadorSincronizacao
 );
-// Control whether to auto-restore saved state on load. Default: false (do not auto-restore)
-const AUTO_RESTORE_ON_LOAD = false;
-
 window.addEventListener(
     "load",
     () => {
@@ -1026,6 +1217,9 @@ function restaurarEstado(){
 
         card.dataset.inicioParada =
             item.inicioParada || "";
+
+        card.dataset.ultimoMotivoParada =
+            item.ultimoMotivoParada || "";
 
         card.querySelector(".contador")
             .innerText =

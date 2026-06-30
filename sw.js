@@ -1,4 +1,4 @@
-const CACHE_NAME = "apontamento-v7";
+const CACHE_NAME = "apontamento-v9";
 
 const arquivos = [
     "./",
